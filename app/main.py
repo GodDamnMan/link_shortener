@@ -1,10 +1,22 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse 
 from fastapi import HTTPException
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+
 from .crud import get_original_url
+from .database import init_db
 
 
-app = FastAPI(title="Link Shortener")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    init_db()
+    yield
+
+
+app = FastAPI(title="Link Shortener", lifespan=lifespan)
+
 
 
 @app.get("/")

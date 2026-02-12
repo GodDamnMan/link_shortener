@@ -18,12 +18,14 @@ def init_db():
     Initializes the database by creating the necessary tables
     """
     with get_connection() as conn:
-        conn.execute("""
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS urls (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 shorten_url TEXT UNIQUE NOT NULL,
                 original_url TEXT NOT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+            """
+        )
         conn.commit()
