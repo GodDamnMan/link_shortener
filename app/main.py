@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse 
 from fastapi import HTTPException
+from pydantic import BaseModel, HttpUrl
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from .crud import get_original_url
+from .crud import get_original_url, create_shorten_url
 from .database import init_db
 
 
@@ -31,3 +32,22 @@ def read_root(code: str):
         raise HTTPException(status_code=404, detail="Shorten URL not found")
     
     return RedirectResponse(original_url, status_code=302)
+
+
+
+
+class ShortenRequest(BaseModel):
+    original_url: HttpUrl
+    custom_code: str | None = None
+
+@app.post("/shorten", status_code=201)
+async def shorten(request: ShortenRequest, req: Request):
+    try:
+        custom_code = create_shorten_url(str(request.original_url), request.custom_code)
+        short_url = f"{req.url.scheme}://{req.url.netloc}/{custom_code}"
+
+        return {"shorten_url": short_url}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error {e}")
