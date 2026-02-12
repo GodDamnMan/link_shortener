@@ -44,6 +44,9 @@ class ShortenRequest(BaseModel):
 async def shorten(request: ShortenRequest, req: Request):
     try:
         custom_code = create_shorten_url(str(request.original_url), request.custom_code)
+        if not custom_code:
+            raise HTTPException(status_code=409, detail=f"Code already exists: {request.custom_code}")
+
         short_url = f"{req.url.scheme}://{req.url.netloc}/{custom_code}"
 
         return {"shorten_url": short_url}
