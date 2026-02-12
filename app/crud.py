@@ -39,7 +39,6 @@ def create_shorten_url(original_url: str, custom_code: str | None = None) -> str
                 
                 return custom_code
             except sqlite3.IntegrityError:
-                # TODO log and response if collison
                 return None
 
 
